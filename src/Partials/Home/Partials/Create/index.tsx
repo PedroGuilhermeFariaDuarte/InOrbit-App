@@ -1,28 +1,32 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import * as Dialog from "@radix-ui/react-dialog";
+import { useQueryClient } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
 
 // Icons
-import { CheckCircle2, Circle, Plus, Save } from "lucide-react";
+import { CheckCircle2, Circle, Plus, X } from "lucide-react";
 
 // Types
 import { ICreateProps, TCreateGoal } from "./types";
 
 // Components
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
 import { Button } from "../../../../components/Button";
+
+// Schemas
 import { SCCreateGoal } from "./schemas";
 
 export function Create(_props: ICreateProps) {
 
-    const form = useForm<TCreateGoal>({
+    const {formState, ...form} = useForm<TCreateGoal>({
         defaultValues: {
             title: '',
-            desiredWeeklyFrequency: 1
+            desiredWeeklyFrequency: -1
         },
         resolver: zodResolver(SCCreateGoal)
     })
 
     // AUX Variables
+    const QUERY_CLIENT = useQueryClient()
     const EMOJIS_BY_FREQUENCY_ON_WEEK: {[index: string]: any} = {
         "1": '🥱',
         "2": '🙂',
@@ -33,11 +37,32 @@ export function Create(_props: ICreateProps) {
         "7": '🔥'
     }
 
-    function onSubmit(data: TCreateGoal){
+    async function onSubmit(data: TCreateGoal){
         try {
+            if(!data) throw new Error('The data is not valid');
+
+            const GOAL_RESPONSE = await fetch('http://localhost:3333/goals/create', {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            })
+
+            if(GOAL_RESPONSE.status !== 201) throw new Error('The goal cannot be created');
+           
+            QUERY_CLIENT.invalidateQueries({
+                queryKey: ['query-summary-week']
+            })
             
+            QUERY_CLIENT.invalidateQueries({
+                queryKey: ['query-summary-peddings-goals']
+            })  
+
+            form.reset()
         } catch (error) {
-            
+            // do anything
         }
     }
 
@@ -45,7 +70,8 @@ export function Create(_props: ICreateProps) {
         <Dialog.Root>
             <Dialog.Trigger className="bg-transparent border-0 outline-none">
                 <Button >
-                    <Plus className="size-4"/> Cadastrar meta  
+                    <Plus className="size-4"/> 
+                    <span className="flex max-sm:hidden">Cadastrar meta</span>
                 </Button> 
             </Dialog.Trigger>
             <Dialog.Portal>
@@ -70,7 +96,9 @@ export function Create(_props: ICreateProps) {
                     </Dialog.Description>
 
                     <form
-                        onSubmit={form.handleSubmit(onSubmit)}
+                        name="goal-create-form"
+                        id="goal-create-form"
+                        onSubmit={form.handleSubmit(onSubmit, (e) => console.log(e))}
                         className="w-full flex-1 flex flex-col justify-between"
                     >
                         <div className="w-full flex flex-col gap-6">
@@ -92,16 +120,12 @@ export function Create(_props: ICreateProps) {
                                         duration-[0.14s]
                                     "
                                 />
-                                
-                                {
-                                    form.formState.errors.title && (
-                                        <p className="text-red-400 text-sm">
-                                            {
-                                                form.formState.errors.title.message
-                                            }
-                                        </p>
-                                    )
-                                }
+                                                                
+                                <p data-haserror={formState.errors.title && true} className="hidden data-[haserror=true]:flex text-red-400 text-sm">
+                                    {
+                                        formState?.errors?.title?.message || 'Atenção!!!'
+                                    }
+                                </p>                                
 
                             </div>
 
@@ -172,19 +196,25 @@ export function Create(_props: ICreateProps) {
                                         ))
                                     }
                                 </ul>
+
+                                <p data-haserror={formState.errors.desiredWeeklyFrequency && true} className="hidden data-[haserror=true]:flex text-red-400 text-sm">
+                                    {
+                                        formState?.errors?.desiredWeeklyFrequency?.message || 'Atenção!!!'
+                                    }
+                                </p> 
                             </div>
                         </div>
 
-                        <div
-                            className="flex items-center gap-3"
-                        >
+                        <div className="flex items-center gap-3">
                             <Dialog.Close asChild>
-                                <Button className="">
-                                    Fechar
+                                <Button className="bg-zinc-600 hover:bg-red-500 border-none">
+                                    <X className="md:hidden"/> 
+                                    <span className="flex max-sm:hidden">Fechar</span>                                    
                                 </Button> 
                             </Dialog.Close>
-                            <Button type="submit">
-                                <Save /> Salvar
+                            <Button type="submit" className="flex-1 justify-center" form="goal-create-form">
+                                <Plus /> 
+                                <span className="flex max-sm:hidden">Criar meta</span>
                             </Button> 
                         </div>
                     </form>
