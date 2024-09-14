@@ -5,8 +5,10 @@ import logoInOrbit from "../../assets/logo-header-in-orbit.svg";
 // Partials
 import { Create } from "../../components/Create";
 
-export function Summary() {
+// Types
+import { ISummaryProps } from "./types";
 
+export function Summary({summary}: ISummaryProps) {
     // AUX Variables
     const GOALS_COMPLETED_PERCENT = Math.floor((8 / 15) * 100)
     const GOALS_COMPLETED_BY_TEXT = GOALS_COMPLETED_PERCENT + '%'
@@ -22,7 +24,7 @@ export function Summary() {
                 <Create />
             </div>
 
-            <div className="flex flex-col gap-3 bg-red-500">
+            <div className="min-h-16 flex-1 flex flex-col gap-3">
                 <div className="w-full bg-zinc-900 rounded-full h-2">
                     <span
                         className="rounded-full flex bg-gradient-to-r from-pink-500 to-violet-500 h-full"
@@ -46,14 +48,15 @@ export function Summary() {
 
                 <span className="w-full h-px bg-zinc-900"></span>
 
-                <div className="w-full flex flex-row  flex-wrap gap-3">
+                <div className="w-full h-[100px] overflow-y-auto flex flex-row items-center flex-wrap gap-3 rounded-lg  py-2 border-b-2 border-b-zinc-900">
                     {
                         Array(7).fill(null).map((_, index) => (
                             <button 
                                 key={index}
                                 type="button"
                                 disabled={(index % 2) ? true : false}
-                                className="flex items-center 
+                                className="
+                                    flex items-center 
                                     px-3 py-2 gap-2 leading-none rounded-full 
                                     border border-dashed border-zinc-800
                                     text-sm text-zinc-300 
@@ -70,22 +73,32 @@ export function Summary() {
                         ))
                     }
                 </div>
+                
+                <h2 className="text-xl font-medium">Sua Semana</h2>
 
-                <div className="flex-1 flex flex-col gap-6 bg-blue-500">
-                    <h2 className="text-xl font-medium">Sua Semana</h2>
+                <div className="h-full overflow-y-auto flex flex-col gap-6 rounded-lg">
 
-                    <div className="flex-1 flex flex-col gap-4 bg-green-500">
-                        <h3 className="font-medium">Domingo <span className="text-zinc-500 text-xs">(10 de Agosto)</span></h3>
+                    {
+                        Object.keys(summary.goalsPerDay).map((key, _index) => (
+                            <div key={key} className="flex-1 flex flex-col gap-4">
+                                <h3 className="font-medium">Domingo <span className="text-zinc-500 text-xs">({new Date(key).toLocaleDateString()})</span></h3>
 
-                        <ul className="flex-1 flex flex-col gap-3 bg-fuchsia-500 overflow-y-auto">
-                            <li className="flex items-center gap-2">
-                                <CheckCircle2 className="size-4 text-pink-500"/>
-                                <span className="text-sm text-zinc-400">
-                                    Você completeou "<span className="text-zinc-100">Meditar</span>" ás <span className="text-zinc-100">8:14h</span>
-                                </span>
-                            </li>
-                        </ul>
-                    </div>
+                                <ul className="h-auto flex flex-col gap-3">
+                                    {
+                                        summary.goalsPerDay[key].map((summary) => (
+                                            <li key={summary.id} className="w-full min-h-8 h-auto flex items-center gap-2">
+                                                <CheckCircle2 className="size-4 text-pink-400"/>
+                                                <span className="flex-1 text-sm text-zinc-400 text-ellipsis">
+                                                    Você completou "<span className="text-zinc-100">{summary.title}</span>" ás <span className="text-zinc-100">{new Date(summary.completedAt).getHours()}</span>
+                                                </span>
+                                            </li>
+                                        ))
+                                    }
+                                </ul>
+                            </div>
+                        ))
+                    }
+
                 </div>
             </div>
         </div>
