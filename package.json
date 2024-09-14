@@ -12,7 +12,9 @@
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
     "@radix-ui/react-dialog": "^1.1.1",
+    "@tanstack/react-query": "^5.56.2",
     "autoprefixer": "^10.4.20",
+    "dayjs": "^1.11.13",
     "lucide-react": "^0.441.0",
     "postcss": "^8.4.45",
     "react": "^18.3.1",

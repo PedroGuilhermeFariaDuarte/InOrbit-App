@@ -4,6 +4,11 @@ export interface IGoals {
     title: string    
 }
 
+export interface IGoalsPedding extends IGoals {
+    desiredWeeklyFrequency: number;
+    completionCount: number;
+}
+
 export type TSummary = {
     completed: number,
     goalsTotal: number,
