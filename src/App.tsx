@@ -9,7 +9,13 @@ import { useQuery } from "@tanstack/react-query";
 import { Home } from "./Partials/Home";
 import { Summary } from "./Partials/Summary";
 
-function App() {
+function App() {  
+
+  // const isFetching = useIsFetching({
+  //   queryKey: ['query-summary-week','query-summary-peddings-goals']
+  // })
+  
+  // AUX Variables
   const {data: SUMMARY_DATA, isFetching } = useQuery<TSummary>({
     queryKey: ['query-summary-week'],
     queryFn: async () => await (await fetch('http://localhost:3333/summary/week')).json(),

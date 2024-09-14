@@ -46,8 +46,12 @@ export function Summary({summary}: ISummaryProps) {
             if(GOAL_COMPLETED_RESPONSE.status !== 201) throw new Error('The goal cannot be completed');
 
             QUERY_CLIENT.invalidateQueries({
-                queryKey: ['query-summary-week', 'query-summary-peddings-goals']
-            })            
+                queryKey: ['query-summary-week']
+            })
+
+            QUERY_CLIENT.invalidateQueries({
+                queryKey: ['query-summary-peddings-goals']
+            })
         } catch (error) {
             // do anything
         }
@@ -101,25 +105,35 @@ export function Summary({summary}: ISummaryProps) {
                         !isFetching && GOALS_PEDDINGS_DATA!?.map((goal, _index) => (
                             <button
                                 key={goal.id}
+                                title={goal.title}
                                 onClick={() => setCompletedGoal(goal.id)}
                                 type="button"
                                 disabled={goal.completionCount >= goal.desiredWeeklyFrequency}
-                                data-waittodo={QUERY_CLIENT.isFetching}
+                                data-waittodo={isFetching}
                                 className="
                                     flex-1
                                     min-w-[155px]
                                     flex items-center
-                                    px-3 py-2 gap-2 leading-none rounded-full 
+                                    px-3 py-2 gap-2 
+                                    leading-none 
+                                    rounded-full 
                                     border border-dashed border-zinc-800
                                     text-sm text-zinc-300 
+                                    
                                     hover:border-zinc-700
-                                    disabled:opacity-50 disabled:pointer-events-none
-                                    outline-none focus-visible:border-pink-500
-                                    ring-pink-500/10
+
+                                    active:bg-pink-500/50
+                                    active:border-pink-500
+                                    
+                                    disabled:opacity-50 
+                                    disabled:pointer-events-none
+                                    outline-none 
+                                    ring-0
+
+                                    focus-visible:border-pink-500
+                                    
+
                                     focus-visible:ring-4
-                                    text-ellipsis
-                                    overflow-hidden
-                                    whitespace-nowrap
                                     disabled:select-none
                                     disabled:cursor-not-allowed
 
@@ -131,8 +145,13 @@ export function Summary({summary}: ISummaryProps) {
                                     duration-[0.38s]
                                 "
                             >
-                                <Plus className="size-4 text-zinc-600" />
-                                {goal.title}
+                                <Plus 
+                                    data-showme={goal.completionCount < goal.desiredWeeklyFrequency}
+                                    className="hidden size-4 text-zinc-600 data-[showme=true]:flex" 
+                                />
+                                <span className="flex-1 text-ellipsis overflow-hidden whitespace-nowrap">
+                                    {goal.title}
+                                </span>
                             </button>
                         ))
                     }
